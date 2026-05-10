@@ -1,0 +1,11 @@
+**/target/
+**/.idea/
+**/.bloop/
+**/.metals/
+**/*.iml
+.git/
+.gitignore
+README.md
+**/README.md
+.mcp.json
+.claude/
