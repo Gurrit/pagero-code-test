@@ -10,4 +10,4 @@ CREATE TABLE emails (
 );
 
 CREATE INDEX idx_emails_sender_id    ON emails (sender_id);
-CREATE INDEX idx_emails_sent_at_desc ON emails (sent_at DESC);
+CREATE INDEX idx_emails_created_at_desc ON emails (created_at DESC);

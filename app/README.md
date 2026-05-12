@@ -81,8 +81,8 @@ cost.
 ### Commands
 
 ```bash
-./mvnw -pl app test     # unit tests only (fast)
+./mvnw -pl app -am test     # unit tests only (fast)
 ```
 ```bash
-./mvnw -pl app verify   # unit tests + integration tests
+./mvnw -pl app -am verify   # unit tests + integration tests
 ```

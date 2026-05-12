@@ -126,7 +126,7 @@ If you'd rather iterate locally (faster reloads), run from Maven or your
 IDE:
 
 ```bash
-./mvnw -pl app spring-boot:run
+./mvnw -pl app -am spring-boot:run
 ```
 
 ---

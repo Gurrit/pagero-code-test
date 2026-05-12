@@ -6,7 +6,7 @@ Not a script — feel free to ignore.
 ## 1. Get the green/red bar
 
 ```bash
-./mvnw -pl app verify
+./mvnw -pl app -am verify
 ```
 
 You should see one unit test passing and two integration tests failing
