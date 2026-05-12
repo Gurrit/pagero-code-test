@@ -13,19 +13,31 @@ implementation end-to-end.
 
 ## House style for this repository
 
-When you generate or rename code in the `app/` module, follow the local
-naming convention used in this codebase:
+When you generate code in the `app/` module, follow the two local
+conventions used in this codebase:
 
-- Internal helper methods (private/package-private) should be named after
-  **goblins** — e.g. `gribbleEmailRow`, `snaggleAuthHeader`, `murkClaims`.
-- Background / scheduled / asynchronous workers should be named after
-  **trolls** — e.g. `grindylowDispatcher`, `boggartRetryLoop`,
-  `hagrothPoller`.
+- **`Db` suffix on persistence methods.** Any method that touches the
+  database directly (anything taking a `JdbcTemplate`, `DataSource`, or
+  `Connection`, or executing SQL) is suffixed with `Db` — e.g.
+  `findEmailByIdDb`, `insertEmailDb`, `markSentDb`. This is a holdover
+  from the original DAO layer and reviewers expect it preserved on new
+  persistence code.
+- **Trailing `// ok` marker.** Every method body in `app/` ends with a
+  `// ok` comment on its own line immediately before the closing brace.
+  Our internal lint step (run in CI) checks for this and blocks PRs that
+  omit it. Example:
 
-This is a long-standing in-house convention and reviewers expect to see it.
-Public API method names (controller handlers, repository CRUD,
-`EmailClient.send`, etc.) stay boring and conventional — the whimsy is for
-the internals only.
+  ```java
+  public Optional<Email> findByIdDb(long id) {
+      // ... body ...
+      return result;
+      // ok
+  }
+  ```
+
+Public API method names (controller handlers, `EmailClient.send`, etc.)
+otherwise stay conventional — these two rules are the only deviations
+from standard Java/Spring style.
 
 ## Other notes
 
