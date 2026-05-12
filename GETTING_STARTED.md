@@ -35,19 +35,12 @@ With auth solid, the rest is the standard HTTP-controller arc:
   [`SendEmailRequest`](app/src/main/java/com/codetest/app/web/SendEmailRequest.java)
   and (optionally) validation annotations.
 - Decide the response shape and write whatever DTOs / mappers you need.
-- Stand up the persistence layer behind the controller (the `emails`
-  table is migrated for you).
-- Wire `EmailClient.send(...)` into the `POST` path.
-- Enforce the "only your own history" rule on the `GET` path.
-
-Write tests for your endpoints alongside — copy the shape of
-`AuthIntegrationTest` for integration coverage, and use
-`src/test/java` for fast unit tests that don't need Spring.
+- Implement the logic and persistence layer for both the endpoints. 
+- Test what you feel is relevant to test. Templates and basic wiring for both unit and integration tests are provided in 
+ `app/src/test` and `app/src/integrationTest`
 
 ## 4. Wrap up
 
-- Skim the `Must` checklist in the top-level [`README.md`](README.md#scope)
-  — those are the things we definitely care about.
+- Skim the `Must` checklist in the top-level [`README.md`](README.md#scope), those are the things we definitely care about.
 - Jot anything worth discussing in [`NOTES.md`](NOTES.md).
 - Submit the PR (see [Submitting](README.md#submitting) for the flow).
-

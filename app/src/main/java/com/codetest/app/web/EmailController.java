@@ -16,11 +16,9 @@ import org.springframework.web.bind.annotation.RestController;
  *
  * You decide:
  *
- * * what the request body for {@code POST /emails} looks like (replace the {@code Object} parameter with your own DTO)
-
+ * * what the request body for {@code POST /emails} looks like (implement the {@code SendEmailRequest} class)
  * * what the response body looks like (replace {@code ?} in {@code ResponseEntity<?>} and return the appropriate status)
-
- * * where the persistence + delivery logic lives — usually a service behind this controller
+ * * where the persistence + delivery logic lives
  *
  */
 @RestController
@@ -31,12 +29,7 @@ public class EmailController {
             @AuthenticatedUser UserDetails caller,
             @RequestBody SendEmailRequest request
     ) {
-        // TODO (candidate):
-        //   1. Fill in the fields on SendEmailRequest.
-        //   2. Persist the email (sender = caller, plus to/subject/body
-        //      and a server-assigned sent_at).
-        //   3. Call EmailClient.send(...).
-        //   4. Return 201 Created with the persisted email.
+        // TODO (candidate): Implement this flow endpoint end-2-end
         throw new UnsupportedOperationException("POST /emails not implemented");
     }
 
@@ -45,10 +38,7 @@ public class EmailController {
             @AuthenticatedUser UserDetails caller,
             @PathVariable String userId
     ) {
-        // TODO (candidate):
-        //   1. Enforce that `userId` matches the authenticated caller.
-        //   2. Load all emails sent by `userId`, newest first.
-        //   3. Return 200 OK with a JSON array (empty if none).
+        // TODO (candidate): Implement this flow endpoint end-2-end
         throw new UnsupportedOperationException("GET /users/{userId}/emails not implemented");
     }
 }

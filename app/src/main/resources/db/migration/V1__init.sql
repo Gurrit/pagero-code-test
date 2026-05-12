@@ -1,13 +1,12 @@
 CREATE TABLE emails (
-    id           BIGINT       AUTO_INCREMENT PRIMARY KEY,
-    message_id   VARCHAR(36)  DEFAULT CAST(RANDOM_UUID() AS VARCHAR(36)) NOT NULL UNIQUE,
-    sender_id    VARCHAR(64)  NOT NULL,
+    id           UUID         PRIMARY KEY,
+    sender_id    UUID         NOT NULL,
     sender_email VARCHAR(254) NOT NULL,
     recipient    VARCHAR(254) NOT NULL,
     subject      VARCHAR(998) NOT NULL,
-    body         CLOB         NOT NULL,
-    status       VARCHAR(32)  DEFAULT 'SENT' NOT NULL,
-    sent_at      TIMESTAMP    DEFAULT CURRENT_TIMESTAMP NOT NULL
+    body         TEXT         NOT NULL,
+    status       VARCHAR(32)  NOT NULL,
+    created_at   TIMESTAMP    NOT NULL
 );
 
 CREATE INDEX idx_emails_sender_id    ON emails (sender_id);

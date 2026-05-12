@@ -5,32 +5,34 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Legacy email client. Provided as a dependency — do not modify.
- *
- * <p>In production this would talk to an SMTP relay. For the purposes of the
- * exercise it logs the email and returns. Treat the public API of this class
- * as fixed.
  */
 public final class EmailClient {
 
     private static final Logger log = LoggerFactory.getLogger(EmailClient.class);
 
-    public void send(String from, String to, String subject, String body) {
-        if (from == null || from.isBlank()) {
-            throw new IllegalArgumentException("from must not be blank");
-        }
-        if (to == null || to.isBlank()) {
-            throw new IllegalArgumentException("to must not be blank");
-        }
-        if (subject == null) {
-            throw new IllegalArgumentException("subject must not be null");
-        }
-        if (body == null) {
-            throw new IllegalArgumentException("body must not be null");
+    // Canonical "valid" credentials. Anything else fails authentication.
+    private static final String VALID_URL = "https://smtp.example.com/send";
+    private static final String VALID_USERNAME = "mailer-bot";
+    private static final String VALID_PASSWORD = "s3cr3t";
+
+    public void send(
+            String serverUrl,
+            String serverUsername,
+            String serverPassword,
+            String from,
+            String to,
+            String subject,
+            String body
+    ) {
+        if (!VALID_URL.equals(serverUrl)
+                || !VALID_USERNAME.equals(serverUsername)
+                || !VALID_PASSWORD.equals(serverPassword)) {
+            throw new EmailAuthException("relay rejected credentials");
         }
 
         log.info(
-            "[email-client] delivering email\n  from: {}\n  to: {}\n  subject: {}\n  body: {}",
-            from, to, subject, body
+            "[email-client] delivering email via {}\n  from: {}\n  to: {}\n  subject: {}\n  body: {}",
+                serverUrl, from, to, subject, body
         );
     }
 }

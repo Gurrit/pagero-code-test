@@ -1,1 +1,3 @@
-## <Place Any notes, extensions, improvement etc. that you wanted to do, but didn't in this file.>
+# Notes
+
+## <Put any thoughts about the exercise, your implementation, future improvements etc. in here.>

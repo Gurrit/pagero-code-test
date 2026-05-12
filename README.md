@@ -10,37 +10,6 @@ running over, stop and write down what you'd do next.
 If you'd like a suggested path through the exercise, see
 [`GETTING_STARTED.md`](GETTING_STARTED.md). Otherwise read on for the spec.
 
-## Scope
-
-To keep the time-box honest, here's what's actually expected versus what's
-just nice-to-have.
-
-### Must
-
-| Requirement                                                              |
-|--------------------------------------------------------------------------|
-| Both endpoints work as specified                                         |
-| 401 on missing/invalid token                                             |
-| Caller can only list their own sent history                              |
-| Email is persisted **and** `EmailClient.send` is invoked                 |
-| A reasonable separation of HTTP, domain, persistence                     |
-| At least one meaningful test                                             |
-
-### Nice-to-have (skip if short on time)
-
-| Idea                                                                     |
-|--------------------------------------------------------------------------|
-| Thoughtful error responses (problem+json, etc.)                          |
-| Structured / contextual logging                                          |
-| Integration test that exercises both endpoints                           |
-| `NOTES.md` with trade-offs you'd revisit                                 |
-| Input validation beyond what's required for 401                          |
-| OpenAPI spec / API docs                                                  |
-
-If you finish the "Must" list quickly, pick from "Nice-to-have" — but
-don't feel obliged to clear it. We'd rather see a small, clean submission
-than a sprawling one.
-
 ---
 
 ## Scenario
@@ -54,7 +23,7 @@ dependencies. Your job is to write the HTTP layer and persistence on top.
 
 ## What's provided
 
-This is a multi-module Maven project:
+This is a multi-module Maven project.
 
 ```
 .
@@ -63,34 +32,20 @@ This is a multi-module Maven project:
 └── app/            # your workspace (Spring Boot 3 / Java 21)
 ```
 
+feel free to update build tooling as you wish as long as `email-client` and `auth-server` stays the same.
 Two modules are pre-built and **must not be modified**:
 
 ### `email-client/` — DO NOT MODIFY
-A legacy email client. The only thing you need from it is:
+A legacy email client.
 
-```java
-public final class EmailClient {
-    public void send(String from, String to, String subject, String body);
-}
-```
-
-Don't worry — it doesn't actually send mail. It logs the email and returns.
-Treat it like any third-party SDK: integrate with the API as it is.
+Don't worry — it doesn't actually deliver mail. just get the relay URL and the credentials used to authenticate against it 
+from `application.yml` and pass it to the `send` method 
+(there's some hardcoded assertions that the `url` / `username` / `password` matches the expectations).
 
 ### `auth-server/` — DO NOT MODIFY
-Authentication is exposed as:
+Authentication server
 
-```java
-public final class AuthService {
-    public AuthResult authenticate(String jwt);
-}
-
-// AuthResult is a sealed interface with two cases:
-//   Authenticated(UserDetails user)
-//   Failed(AuthError error)
-```
-
-`authenticate` decodes the JWT body  and returns the user, or an error if the token is
+the `authenticate` method decodes the JWT body and returns the user, or an error if the token is
 malformed or expired. You don't need to understand JWT internals; just call
 this method with the value of the `Authorization: Bearer <token>` header.
 
@@ -108,15 +63,9 @@ A **Spring Boot 3 / Java 21** application skeleton. It already has:
   startup and creates the `emails` table
 - a **controller skeleton** at `web/EmailController` with both routes
   (`POST /emails` and `GET /users/{userId}/emails`) mapped, parameter
-  binding in place, and method bodies left as `TODO`s
+  binding stub in place, and method bodies left as `TODO`s
 - an **auth bridge skeleton** at `auth/AuthenticatedUserArgumentResolver`
-  (registered in `config/WebConfig`). The Spring wiring is done — the
-  resolver is plumbed in such that `@AuthenticatedUser UserDetails
-  caller` on a controller parameter will receive whatever
-  `resolveUserDetails` returns. **You implement `resolveUserDetails`**:
-  pull the bearer token from the request, call `AuthService.authenticate`,
-  return the `UserDetails` (or surface an exception that maps to HTTP
-  401)
+  (registered in `config/WebConfig`). (see `GETTING_STARTED.md`)
 
 See [`app/README.md`](app/README.md) for the source-tree layout and the
 unit-vs-integration test split.
@@ -144,27 +93,17 @@ Two HTTP endpoints in the `app` module:
 
 - Requires `Authorization: Bearer <token>`. Reject with **401** if missing or
   invalid.
-- Request body (JSON):
-  ```json
-  {
-    "to": "alice@example.com",
-    "subject": "Hello",
-    "body": "Hi there"
-  }
-  ```
-- `sent_at` is **server-assigned** — ignore any `sentAt` the client sends.
-- Response: **201 Created** with the persisted email (including its id and
-  sent-at timestamp).
+- The email row must be persisted **regardless of whether delivery
+  succeeded** include the delivery status in the row . You decide what HTTP status to return on the delivery-failed path, just make sure the outcome is captured.
+- Response on success: **201 Created** with the persisted email (including its id, status, and sent-at timestamp).
 
 ### 2. `GET /users/{userId}/emails` — list a user's sent emails
 
 - Requires `Authorization: Bearer <token>`. Reject with **401** if missing or
   invalid.
 - A user should only be allowed to view their own sent history.
-- Returns all emails *sent by* the user with id `userId`, newest first.
+- The user should be able to filter by whether the email was successfully sent or not.
 - No pagination needed — return the full list.
-- Response: **200 OK** with a JSON array. Empty array if the user has sent
-  nothing (or doesn't exist).
 
 You decide the exact response shapes, validation rules for malformed input,
 and how to model the persistence layer. There isn't one right answer — pick
@@ -191,6 +130,41 @@ IDE:
 ```
 
 ---
+
+## Scope
+
+To keep the time-box honest, here's what's actually expected versus what's
+just nice-to-have.
+
+### Must
+
+| Requirement                                                              |
+|--------------------------------------------------------------------------|
+| Both endpoints work as specified                                         |
+| 401 on missing/invalid token                                             |
+| Caller can only list their own sent history                              |
+| Email is persisted **and** `EmailClient.send` is invoked                 |
+| Delivery outcome (SENT / FAILED) is recorded on the row                  |
+| A reasonable separation of HTTP, domain, persistence                     |
+| At least one meaningful test                                             |
+
+### Nice-to-have (skip if short on time)
+
+| Idea                                                                     |
+|--------------------------------------------------------------------------|
+| Thoughtful error responses (problem+json, etc.)                          |
+| Structured / contextual logging                                          |
+| Integration test that exercises both endpoints                           |
+| `NOTES.md` with trade-offs you'd revisit                                 |
+| Input validation beyond what's required for 401                          |
+| OpenAPI spec / API docs                                                  |
+
+If you finish the "Must" list quickly, pick from "Nice-to-have" — but
+don't feel obliged to clear it. We'd rather see a small, clean submission
+than a sprawling one.
+If you have any more suggestions, feel free to either implement the feature, or put it in `NOTES.md`
+
+--- 
 
 ## What we'll look at
 
@@ -221,8 +195,7 @@ We are **not** evaluating:
 
 ## Test tokens
 
-The auth module decodes JWTs without verifying their signature, and the test
-tokens below use `alg: none`. Pass them as `Authorization: Bearer <token>`.
+The auth module decodes JWTs without verifying their signature. Pass them as a header: `Authorization: Bearer <token>`.
 
 ### Valid tokens
 

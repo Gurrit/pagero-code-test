@@ -16,6 +16,11 @@ spring:
 server:
   port: 8080
 
+email-config:
+  url: https://smtp.example.com/send
+  username: mailer-bot
+  password: s3cr3t
+
 logging:
   level:
     com.codetest: DEBUG
