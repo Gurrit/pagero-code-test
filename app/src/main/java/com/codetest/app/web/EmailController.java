@@ -1,7 +1,9 @@
 package com.codetest.app.web;
 
 import com.codetest.app.auth.AuthenticatedUser;
+import com.codetest.app.util.Printer;
 import com.codetest.auth.UserDetails;
+import com.codetest.email.EmailClient;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -9,6 +11,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -33,6 +37,9 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class EmailController {
 
+    @Autowired
+    private EmailService emailService;
+
     @Operation(summary = "Sends an email to a person", description = "This operation sends an email to a person who is defined by the request parameter. The caller must be an AuthenticatedUser with the correct UserDetails in order for this method to succeed.")
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "The email was succesfully sent"),
@@ -42,7 +49,12 @@ public class EmailController {
     public ResponseEntity<Void> send(
             @Parameter(description = "The authenticated caller of this endpoint. ", schema = @Schema(implementation = UserDetails.class)) @AuthenticatedUser UserDetails caller,
             @Parameter(description = "The request to actually send an email to a person. ", schema = @Schema(implementation = UserDetails.class)) @RequestBody SendEmailRequest request) {
-        // TODO (candidate): Implement this flow endpoint end-2-end
+
+        Printer.debug("The send() endpoint has been reached for the user: " + caller);
+        Printer.debug("Sending mail: " + request);
+
+        emailService.send(caller, request);
+
         throw new UnsupportedOperationException("POST /emails not implemented");
     }
 

@@ -14,26 +14,26 @@ package com.codetest.app.util;
  * 
  */
 public abstract class Printer {
-    private final String RED = "";
-    private final String BLUE = "";
-    private final String GREEN = "";
-    private final String RESET = "";
-    private final String BOLD = "";
-    private final String YELLOW = "";
+    private static final String RED = "[31m";
+    private static final String BLUE = "[34m";
+    private static final String GREEN = "[32m";
+    private static final String RESET = "[0m";
+    private static final String BOLD = "[1m";
+    private static final String YELLOW = "[33m";
 
     public static void log(String message) {
-
+        System.out.println(BOLD + GREEN + "[LOG]" + RESET + " " + message);
     }
 
     public static void debug(String message) {
-
+        System.out.println(BOLD + BLUE + "[DEBUG]" + RESET + " " + message);
     }
 
     public static void error(String message) {
-
+        System.out.println(BOLD + RED + "[ERROR]" + RESET + " " + message);
     }
 
     public static void security(String message) {
-
+        System.out.println(BOLD + YELLOW + "[SECURITY]" + RESET + " " + message);
     }
 }
