@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 /**
  * HTTP entry points for the exercise. Routes, parameter binding and the
@@ -60,7 +61,12 @@ public class EmailController {
         Printer.debug("The send() endpoint has been reached for the user: " + caller);
         Printer.debug("Sending mail: " + request);
 
-        emailService.send(caller, request);
+        try {
+            emailService.send(caller, request);
+        } catch (IllegalArgumentException e) {
+            Printer.log("Mail request with null values occured.");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+        }
         Printer.debug("Managed to send the mail.");
         return new ResponseEntity<Void>(HttpStatus.CREATED);
     }
@@ -74,13 +80,13 @@ public class EmailController {
     @GetMapping("/users/{userId}/emails")
     public ResponseEntity<List<EmailDTO>> listSentBy(
             @Parameter(hidden = true) @AuthenticatedUser UserDetails caller,
-            @Parameter(description = "The id of the user whose sent emails should be listed.") @PathVariable String userId) {
+            @Parameter(description = "The id of the user whose sent emails should be listed.") @PathVariable("userId") String userId) {
 
         if (!caller.id().equals(userId)) {
             Printer.security("The caller " + caller + " tried to access the mails of userId " + userId);
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN);
         }
         Printer.debug("Reached the listSentBy endpoint. ");
-
-        throw new UnsupportedOperationException("GET /users/{userId}/emails not implemented");
+        return ResponseEntity.ok(emailService.listSentBy(caller, userId));
     }
 }

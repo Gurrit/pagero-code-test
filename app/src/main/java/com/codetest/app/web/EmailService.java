@@ -50,9 +50,14 @@ public class EmailService {
      * 
      * @param caller  The sender of the email
      * @param request The data of the email to be sent
-     * @throws ResponseStatusException If the mail couldn't be sent.
+     * @throws ResponseStatusException  If the mail couldn't be sent.
+     * @throws IllegalArgumentException If the request isn't valid (any fields are
+     *                                  null).
      */
-    public void send(UserDetails caller, SendEmailRequest request) throws ResponseStatusException {
+    public void send(UserDetails caller, SendEmailRequest request)
+            throws ResponseStatusException, IllegalArgumentException {
+        if (!validMailRequest(request))
+            throw new IllegalArgumentException();
         Email mail = newPendingEmail(caller, request);
 
         try {
@@ -109,5 +114,12 @@ public class EmailService {
         email.setSubject(request.subject());
         email.setRecipient(request.to());
         return emailRepository.saveAndFlush(email);
+    }
+
+    private boolean validMailRequest(SendEmailRequest request) {
+        if (request.body() == null || request.subject() == null || request.to() == null) {
+            return false;
+        }
+        return true;
     }
 }
