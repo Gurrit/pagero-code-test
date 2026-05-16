@@ -1,14 +1,21 @@
 package com.codetest.app.web;
 
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
+
+import com.codetest.app.database.dto.EmailDTO;
 import com.codetest.app.database.entities.Email;
 import com.codetest.app.database.repository.EmailRepository;
 import com.codetest.app.util.Printer;
 import com.codetest.auth.UserDetails;
-import com.codetest.email.EmailAuthException;
 import com.codetest.email.EmailClient;
-
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
 
 /**
  * Handles the persistence + delivery logic for emails. The controller
@@ -40,10 +47,26 @@ public class EmailService {
      * {@link EmailClient}. The row must be persisted regardless of
      * whether delivery succeeded — the status column reflects the
      * outcome.
+     * 
+     * @param caller  The sender of the email
+     * @param request The data of the email to be sent
+     * @throws ResponseStatusException If the mail couldn't be sent.
      */
-    public void send(UserDetails caller, SendEmailRequest request) {
-        Printer.debug("EmailService.send invoked by " + caller);
+    public void send(UserDetails caller, SendEmailRequest request) throws ResponseStatusException {
+        Email mail = newPendingEmail(caller, request);
 
+        try {
+            emailClient.send(emailServerUrl, emailServerUsername, emailServerPassword, caller.email(), request.to(),
+                    request.subject(), request.body());
+            mail.setStatus(Email.Status.SENT);
+
+        } catch (Exception e) {
+            mail.setStatus(Email.Status.FAILED);
+            emailRepository.saveAndFlush(mail);
+            Printer.error("The email was not sent as it should have.");
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+                    "There was an error when sending the mail. The mail has not been sent");
+        }
     }
 
     /**
@@ -51,7 +74,40 @@ public class EmailService {
      * their own history — the controller is responsible for enforcing
      * that {@code caller.id().equals(userId)}.
      */
-    public void listSentBy(UserDetails caller, String userId) {
+    public List<EmailDTO> listSentBy(UserDetails caller, String userId) throws IllegalArgumentException {
         Printer.debug("EmailService.listSentBy invoked by " + caller + " for " + userId);
+        if (!caller.id().equals(userId)) {
+            Printer.security("listSentBy method got breached by the caller " + caller + " with userId " + userId);
+            throw new IllegalArgumentException();
+        }
+
+        List<Email> emails = emailRepository.findBySenderIdOrderByCreatedAtDesc(UUID.fromString(userId));
+        List<EmailDTO> emailDTOs = new ArrayList<>();
+
+        for (Email email : emails)
+            emailDTOs.add(EmailDTO.from(email));
+
+        return emailDTOs;
+
+    }
+
+    /**
+     * Creates a new email row and marks it as PENDING.
+     * 
+     * @param caller  The sender of the email
+     * @param request The email details
+     * @return An Email object.
+     */
+    private Email newPendingEmail(UserDetails caller, SendEmailRequest request) {
+        Email email = new Email();
+        email.setSenderEmail(caller.email());
+        email.setSenderId(UUID.fromString(caller.id()));
+
+        email.setStatus(Email.Status.PENDING);
+        email.setBody(request.body());
+        email.setCreatedAt(Instant.now());
+        email.setSubject(request.subject());
+        email.setRecipient(request.to());
+        return emailRepository.saveAndFlush(email);
     }
 }

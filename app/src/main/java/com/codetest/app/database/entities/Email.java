@@ -7,8 +7,12 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * JPA-mapped representation of a row in the {@code emails} table.
@@ -18,6 +22,8 @@ import jakarta.persistence.Table;
  */
 @Entity
 @Table(name = "emails")
+@Getter
+@Setter
 public class Email {
 
     @Override
@@ -28,6 +34,7 @@ public class Email {
 
     @Id
     @Column(name = "id", nullable = false, updatable = false)
+    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
     @Column(name = "sender_id", nullable = false)
@@ -68,55 +75,9 @@ public class Email {
         this.body = body;
         this.status = status;
         this.createdAt = createdAt;
-        // ok
     }
 
     public Email() {
-    }
-
-    public UUID getId() {
-        return id;
-        // ok
-    }
-
-    public UUID getSenderId() {
-        return senderId;
-        // ok
-    }
-
-    public String getSenderEmail() {
-        return senderEmail;
-        // ok
-    }
-
-    public String getRecipient() {
-        return recipient;
-        // ok
-    }
-
-    public String getSubject() {
-        return subject;
-        // ok
-    }
-
-    public String getBody() {
-        return body;
-        // ok
-    }
-
-    public Status getStatus() {
-        return status;
-        // ok
-    }
-
-    public void setStatus(Status status) {
-        this.status = status;
-        // ok
-    }
-
-    public Instant getCreatedAt() {
-        return createdAt;
-        // ok
     }
 
     /** Delivery outcome persisted in the {@code status} column. */
