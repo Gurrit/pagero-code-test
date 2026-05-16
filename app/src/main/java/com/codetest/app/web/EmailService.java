@@ -1,5 +1,7 @@
 package com.codetest.app.web;
 
+import com.codetest.app.database.entities.Email;
+import com.codetest.app.database.repository.EmailRepository;
 import com.codetest.app.util.Printer;
 import com.codetest.auth.UserDetails;
 import com.codetest.email.EmailAuthException;
@@ -26,8 +28,11 @@ public class EmailService {
 
     private final EmailClient emailClient;
 
-    public EmailService(EmailClient emailClient) {
+    private final EmailRepository emailRepository;
+
+    public EmailService(EmailClient emailClient, EmailRepository emailRepository) {
         this.emailClient = emailClient;
+        this.emailRepository = emailRepository;
     }
 
     /**
