@@ -45,6 +45,12 @@
                 <artifactId>auth-server</artifactId>
                 <version>${project.version}</version>
             </dependency>
+
+            <dependency>
+                <groupId>org.springdoc</groupId>
+                <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+                <version>2.8.3</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
