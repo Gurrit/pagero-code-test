@@ -2,6 +2,13 @@ package com.codetest.app.web;
 
 import com.codetest.app.auth.AuthenticatedUser;
 import com.codetest.auth.UserDetails;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -16,28 +23,38 @@ import org.springframework.web.bind.annotation.RestController;
  *
  * You decide:
  *
- * * what the request body for {@code POST /emails} looks like (implement the {@code SendEmailRequest} class)
- * * what the response body looks like (replace {@code ?} in {@code ResponseEntity<?>} and return the appropriate status)
+ * * what the request body for {@code POST /emails} looks like (implement the
+ * {@code SendEmailRequest} class)
+ * * what the response body looks like (replace {@code ?} in
+ * {@code ResponseEntity<?>} and return the appropriate status)
  * * where the persistence + delivery logic lives
  *
  */
 @RestController
 public class EmailController {
 
+    @Operation(summary = "Sends an email to a person", description = "This operation sends an email to a person who is defined by the request parameter. The caller must be an AuthenticatedUser with the correct UserDetails in order for this method to succeed.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "201", description = "The email was succesfully sent"),
+            @ApiResponse(responseCode = "401", description = "The provided JWT was invalid or missing.")
+    })
     @PostMapping("/emails")
-    public ResponseEntity<?> send(
-            @AuthenticatedUser UserDetails caller,
-            @RequestBody SendEmailRequest request
-    ) {
+    public ResponseEntity<Void> send(
+            @Parameter(description = "The authenticated caller of this endpoint. ", schema = @Schema(implementation = UserDetails.class)) @AuthenticatedUser UserDetails caller,
+            @Parameter(description = "The request to actually send an email to a person. ", schema = @Schema(implementation = UserDetails.class)) @RequestBody SendEmailRequest request) {
         // TODO (candidate): Implement this flow endpoint end-2-end
         throw new UnsupportedOperationException("POST /emails not implemented");
     }
 
+    @Operation(summary = "Lists emails sent by a user", description = "This operation lists the emails that were sent by the user identified by the path variable. The caller must be an AuthenticatedUser with the correct UserDetails in order for this method to succeed.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "The emails were succesfully retrieved"),
+            @ApiResponse(responseCode = "401", description = "The provided JWT was invalid or missing.")
+    })
     @GetMapping("/users/{userId}/emails")
     public ResponseEntity<?> listSentBy(
-            @AuthenticatedUser UserDetails caller,
-            @PathVariable String userId
-    ) {
+            @Parameter(description = "The authenticated caller of this endpoint. ", schema = @Schema(implementation = UserDetails.class)) @AuthenticatedUser UserDetails caller,
+            @Parameter(description = "The id of the user whose sent emails should be listed. ") @PathVariable String userId) {
         // TODO (candidate): Implement this flow endpoint end-2-end
         throw new UnsupportedOperationException("GET /users/{userId}/emails not implemented");
     }
