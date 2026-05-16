@@ -145,6 +145,33 @@ def retrieve_alice_history() -> None:
             print(f"[FAIL] expected at least {BATCH_SIZE} emails, got {count}")
 
 
+def print_all_emails(token: str, user_id: str) -> None:
+    """Fetch the email history for `user_id` and pretty-print every row."""
+    print(f"\n== All emails for {user_id} ==")
+    resp = list_emails(token, user_id)
+    if resp.status_code != 200:
+        print(f"   could not retrieve emails: {resp.status_code} {resp.text!r}")
+        return
+    try:
+        emails = resp.json()
+    except ValueError:
+        print(f"   body was not JSON: {resp.text!r}")
+        return
+    if not emails:
+        print("   (no emails)")
+        return
+    print(f"   {len(emails)} email(s):")
+    for i, email in enumerate(emails, start=1):
+        sender = email.get("sender", "?")
+        receiver = email.get("reciever", "?")
+        sent_at = email.get("sentAt", "?")
+        subject = email.get("subject", "?")
+        body = email.get("body", "")
+        print(f"   [{i:>3}] {sent_at}  {sender} -> {receiver}")
+        print(f"         subject: {subject}")
+        print(f"         body:    {body!r}")
+
+
 def retrieve_failure_paths() -> None:
     print("\n== Failing retrieve requests ==")
     expect(
@@ -171,6 +198,7 @@ if __name__ == "__main__":
     send_failure_paths()
     retrieve_alice_history()
     retrieve_failure_paths()
+    print_all_emails(ALICE_TOKEN, ALICE_ID)
 
     print(f"\n== Summary: {results['passed']} passed, {results['failed']} failed ==")
     sys.exit(0 if results["failed"] == 0 else 1)

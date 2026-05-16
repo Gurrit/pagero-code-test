@@ -57,17 +57,12 @@ public class EmailController {
     public ResponseEntity<Void> send(
             @Parameter(hidden = true) @AuthenticatedUser UserDetails caller,
             @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "The email to send.", required = true, content = @Content(schema = @Schema(implementation = SendEmailRequest.class))) @RequestBody SendEmailRequest request) {
-
-        Printer.debug("The send() endpoint has been reached for the user: " + caller);
-        Printer.debug("Sending mail: " + request);
-
         try {
             emailService.send(caller, request);
         } catch (IllegalArgumentException e) {
             Printer.log("Mail request with null values occured.");
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
         }
-        Printer.debug("Managed to send the mail.");
         return new ResponseEntity<Void>(HttpStatus.CREATED);
     }
 
@@ -86,7 +81,6 @@ public class EmailController {
             Printer.security("The caller " + caller + " tried to access the mails of userId " + userId);
             throw new ResponseStatusException(HttpStatus.FORBIDDEN);
         }
-        Printer.debug("Reached the listSentBy endpoint. ");
         return ResponseEntity.ok(emailService.listSentBy(caller, userId));
     }
 }

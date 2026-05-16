@@ -80,7 +80,6 @@ public class EmailService {
      * that {@code caller.id().equals(userId)}.
      */
     public List<EmailDTO> listSentBy(UserDetails caller, String userId) throws IllegalArgumentException {
-        Printer.debug("EmailService.listSentBy invoked by " + caller + " for " + userId);
         if (!caller.id().equals(userId)) {
             Printer.security("listSentBy method got breached by the caller " + caller + " with userId " + userId);
             throw new IllegalArgumentException();
